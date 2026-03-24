@@ -1,47 +1,77 @@
 @echo off
-chcp 65001
-mode 117,29
-:ippinger
+title Multi IP Tool - Live Mode
+color 7
+
+:: ===========================
+:: MAIN MENU
+:: ===========================
+:menu
 cls
-title .                                                                                             + CVC + IP PINGER
+echo ======================================
+echo   YOUTUBEVIDEO   MULTI IP TOOL 
+echo ======================================
 echo.
+echo 1. IP Lookup
+echo 2. IP Pinger 
+echo 4. Exit
 echo.
-echo                                                  [7;31m ╔═╗╦╔╗╔╔═╗╔═╗╦═╗ [0m
-echo                                                  [7;31m ╠═╝║║║║║ ╦║╣ ╠╦╝ [0m  
-echo                                                  [7;31m ╩  ╩╝╚╝╚═╝╚═╝╩╚═ [0m
-echo.   
-echo                                      [40;31m╔═════════════[ [40;37mIP PINGER [0m[40;31m]═════════════╗
-echo                                      [40;31m║                                       [40;31m║
-echo                                      [40;31m║         [0m[[31mInstagram[0m] [104m @cvckennyx [0m[40;37m        [40;31m║                               
-echo                                      [40;31m║        [40;37m [[31mDiscord[0m]  [7;31m cvc._. [0m[40;37m        [40;31m║                     
-echo                                      [40;31m║                                       [40;31m║
-echo                                      [40;31m║[40;37m         Please [7;31mPROVIDE[0m The IP         [40;31m║
-echo                                      [40;31m║                                       [40;31m║
-echo                                      [40;31m╚═══════════════════════════════════════╝
+set /p choice=Select an option: 
+
+if "%choice%"=="1" goto ip_lookup
+if "%choice%"=="2" goto ip_pinger
+if "%choice%"=="3" goto tcp_checker
+if "%choice%"=="4" exit
+
+goto menu
+
+:: ===========================
+:: IP LOOKUP
+:: ===========================
+:ip_lookup
+cls
+echo ===========================
+echo        IP LOOKUP
+echo ===========================
 echo.
-set /p SPEED= [37m[root@[31mCVC[37m] Requests speed : (1 = Fast / 2 = Default / 3 = Low): 
-if %SPEED% == 1 goto next
-if %SPEED% == 2 goto next
-if %SPEED% == 3 goto next
-if %SPEED% == nul goto bad
-:bad
+
+set /p ip=Enter IP to lookup: 
+
 echo.
-echo [37m[root@[31mINFO[37m] ERROR ! Choose a number between (1, 2, 3)
-timeout /t 2 /nobreak > nul
-goto ippinger
+powershell -command "try { Invoke-RestMethod ipinfo.io/%ip% } catch { 'Lookup failed' }"
+
+pause
+goto menu
+
+:: ===========================
+:: IP PINGER 
+:: ===========================
+:ip_pinger
+cls
+echo ===========================
+echo         IP PINGER
+echo ===========================
 echo.
-:next
-set /p IP= [37m[root@[31mCVC[37m] Please specify an IP : 
+echo Enter IPs separated by spaces
+echo Example: 8.8.8.8 1.1.1.1
 echo.
-:ipping
-PING -n %SPEED% %IP% | FIND "TTL=">nul
-IF ERRORLEVEL 1 goto downed
-IF NOT ERRORLEVEL 1 goto connected
-:connected
-echo [37m[root@[31mCVC[37m] : [102m CONNECTED [0m to [[92m %IP% [0m] [[92m+[0m] Status : [102m ONLINE [0m BY CVC Kenny
+
+set /p ips=IPs: 
+
 echo.
-goto ipping
-:downed
-echo [37m[root@[31mCVC[37m] : [41m DOWNED [0m to [[31m %IP% [0m] [[31m-[0m] Status : [41m OFFLINE [0m BY CVC Kenny
+echo Pinging IPs (Press CTRL+C to stop)
 echo.
-goto ipping
+
+for %%i in (%ips%) do (
+    echo --------------------------
+    echo Pinging %%i
+    ping %%i -n 20
+)
+
+echo.
+echo Done.
+pause
+goto menu
+
+:: ===========================
+:: TCP PORT CHECKER (10 TIMES)
+:: ===========================
